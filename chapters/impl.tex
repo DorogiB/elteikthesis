@@ -97,7 +97,14 @@ A geometriák átalakító műveletek kialakítása az alábbi elven alapul:
 \end{itemize}
 Ez alapján három típusú transzformáció alakult ki. A rész módosítása, ami a módosítandó részek indexeit és a részeken elvégzendő résztranszformációit tartalmazza, a rész hozzáadása amely az új rész geometriáját és a beszúrás indexét tartalmazza, valamint a rész eltávolítása, amely az eltávolítandó rész indexét tárolja, valamint az eltávolított rész geometriáját, erre az invertálhatóság megvalósításához van szükség.
 \subsection{Az IGeometryTransformation interfész}
-Ahogy korábban is említésre került, az AEGIS a transzformációkat az IGeometryTransformation implementációjaként várja. Ezen interfész legfontosabb metódusai:
+Ahogy korábban is említésre került, az AEGIS a transzformációkat az IGeometryTransformation implementációjaként várja. 
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth,height=250px]{images/GeomTransformIface.png}
+	\caption{A geometriatranszformációs interfész osztálydiagramja}
+	\label{fig:picture-5}
+\end{figure}
+Ezen interfész legfontosabb metódusai:
 \begin{enumerate}
 	\item Execute(IGeometry geometry) : a transzformáció végrehajtása az IGeometry interfésznek megfelelő téradaton, a módosított alakzat visszaadása. A forrásgeometriának meg kell egyeznie a transzformáció bemeneti típusával.
 	\item Invert(): A transzformáció inverzének előállítása, mellyel helyreállítható az eredeti geometria. Hozzáadás típusú művelet inverze ugyanazon az indexen történő eltávolítás és fordítva, részmódosítás esetén a résztranszformációk inverzeinek végrehajtása ugyanazokon a részeken.
