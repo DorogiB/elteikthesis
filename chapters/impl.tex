@@ -10,11 +10,27 @@ Ezt ennek megfelelően kellene végigvezetni a teljes dolgozaton. Valójában ne
 \subsection{Technológiák összekötése}
 A QGIS Python nyelvet használó interfészt biztosít az extra funkciók megvalósítására, az AEGIS keretrendszer pedig a C\# alapú Microsoft.NET keretrendszerben íródott, ezen két technológiát kell valahogy egyesíteni.
 
-\missingfigure{Komponens diagram}
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth,height=220px]{images/qaegis_component_diagram.png}
+	\caption{A végleges program komponensdiagramja}
+	\label{fig:picture-7}
+\end{figure}
 
 \subsection{A geometriaadatok kezelése}
 A geometriák tárolása, betöltése, valamint eltávolításuk kezelése mind az AEGIS létező funkciói voltak a projekt kezdeténél, így a tényleges feladat, a transzformációk definiálása, és létrehozása.
-Az átalakítások tervezése közben az a fő szempont, hogy a lehető legáltalánosabbak legyenek, és minden lehetséges módosítás leírható legyen véges alkalmazásukkal. Ezt a törekvést segíti az, hogy az AEGIS geometriatípusai megfelelnek a \emph{Simple Feature Access} (röviden \emph{SFA}) standardnak \cite{sfa} \todo{Az SFA-ról kicsit írni kellene. Egy osztálydiagram is elférne, generálj egyet VS-ben vagy tudok küldeni.}, ezáltal egy adott hierarchiával rendelkeznek: A pontok különálló típust képeznek, A vonalak koordináták sorozatai, amik hasonlóan viselkednek a pontokhoz, a sokszögek pedig gyűrűkkel vannak leírva, amik a vonalak speciális változatai, így az "alacsonyabb szintű" geometriák transzformációi felhasználhatóak a bonyolultabb térobjektumok átalakításainak leírásához is. Az alakzatok lehetséges változásainak megfelelő rekreálásához a következő transzformációkat szükséges definiálni:
+Az átalakítások tervezése közben az a fő szempont, hogy a lehető legáltalánosabbak legyenek, és minden lehetséges módosítás leírható legyen véges alkalmazásukkal. Ezt a törekvést segíti az, hogy az AEGIS geometriatípusai megfelelnek a \emph{Simple Feature Access} (röviden \emph{SFA}) standardnak \cite{sfa}, ezáltal egy adott hierarchiával rendelkeznek: A pontok különálló típust képeznek, A vonalak koordináták sorozatai, amik hasonlóan viselkednek a pontokhoz, a sokszögek pedig gyűrűkkel vannak leírva, amik a vonalak speciális változatai, így az "alacsonyabb szintű" geometriák transzformációi felhasználhatóak a bonyolultabb térobjektumok átalakításainak leírásához is.
+\begin{note}
+A \textit{Simple Feature Access} geometriák tárolására és elérésére kialakított két részből álló szabvány. Az első rész (SFA-CA azaz \textit{Common Architecture}) egy modellt definiál a két dimenziós geometriáknak pontok közti lineáris interpolációval. Ez a rész definiálja WKT és WKB szabványos reprezentációkat is. A második rész a szabvány SQL alapú implementációját írja le. Az SFA standard az OGC (\textit{Open Geospatial Consortium}) és az ISO (\textit{International Organization for Standardization}) szervezetek által elfogadott.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth,height=220px]{images/sfa.png}
+	\caption{A \textit{Simple Feature Access} objektum-relációs modellje}
+	\label{fig:picture-8}
+\end{figure}
+\end{note}
+
+ Az alakzatok lehetséges változásainak megfelelő rekreálásához a következő transzformációkat szükséges definiálni:
 \begin{itemize}
 	\item Pont eltolása
 	\item Vonal részleges vagy teljes eltolása
@@ -35,8 +51,8 @@ Ezen transzformációk segítségével bármilyen alapvető geometriaváltozást
 
 A transzformációk generálása komplex feladat, melynek során elemeznünk kell a kiindulási geometriát, és a végeredményt, ez alapján pedig létrehozni azt a transzformációgyűjteményt amit végrehajtva az eredetin, megkapjuk az újat. Vonalláncokra és poligonokra a következő algoritmussal adható meg:
 \begin{enumerate}
-	\item Tekintsük a ez eredeti és a módosult geometria "hosszát" (ld. \ref{sec:definitions}.~szakasz)
-	\item A két geometria megegyező hosszú részein -ami megegyezik a "hosszaik" minimumával- hozzuk létre azokat a transzformációkat, amik az eredeti részeit az új részeknek megfelelő részekre alakítják
+	\item Tekintsük az eredeti és a módosult geometria komponenseinek számát (ld. \ref{sec:definitions}.~szakasz)
+	\item A két geometria megegyező hosszú részein -ami megegyezik a komponensszámuk minimumával- hozzuk létre azokat a transzformációkat, amik az eredeti részeit az új részeknek megfelelő részekre alakítják
 	\item Amennyiben az új geometria hosszabb, a régiben még nem létező részeket adjuk hozzá
 	\item Amennyiben a régi geometria hosszabb, az újban már nem létező részeket töröljük ki
 \end{enumerate}
@@ -53,9 +69,7 @@ A fő különbség az AEGIS és a QGIS geometriákat kezelő része között az,
 	\item Az AEGIS-ben tárolt állapotok megjelenítése 
 	\item A verziókezelés lépéseihez grafikus kezelőfelület biztosítása
 \end{itemize}
-Ezeken kívül sajnos láthatóvá kell tenni az AEGIS-hez képest külső modulnak számító plugin számára a geometriák belső azonosítóit, ami szembe megy a verziókezelő tervezési elképzeléseivel de sajnos nem elkerülhető. Ezen kívül valamilyen módon kompatibilissá kell tenni a QGIS geometriáit az AEGIS reprezentációikkal.
-\todo[inline]{Ez nem volt megoldható végül a pontosság csökkentésével? Sokkal szebb megoldás lenne.\\
-Ha nem is megoldható, ez így akkor se legyen leírva, hanem az szerepeljen, hogy az AEGIS minden geometriához egyedi azonosítót rendel, amit felhasználtál, stb.}
+
 
 \section{C\# folyamatok használata Python kódban, a Python.NET modul }
 Ahogy a specifikáció elején említésre került, a szoftver amihez a verziókezelő beépülő modul és a verziókezelést biztosító könyvtár két teljesen különböző technológiát használ. Mivel a Python programozási nyelv széleskörűen elterjedt különböző extra funkciók hozzáadására más környezetekhez, ezért több opció volt az eltérő megoldások összekötésére. Az egyik az IronPython nevű kiegészítő modul a Pythonhoz, viszon ez csak a nyelv 2.7-es verzióját támogatja, aminek hamarosan megszűnik a támogatottsága, így más utat kellett keresni. Az előbbihez hasonlóan nyílt forráskódú Python.NET modul azonos funkcionalitással rendelkezik, és a legújabb verziókkal is kompatibilis, így kézenfekvő megoldásnak bizonyult. A Python.NET projekt integrálása a QGIS pluginba egyedül azért okozott nehézséget, mivel a nyelvi összeköttetést biztosító szoftver fordításához számos dependenciának jelen kell lennie a rendszerben, így végül már fordított bináris formájában került a beépülő modulba. Ez sajnos kizárja annak lehetőségét, hogy a könyvtár esetleges frissülésével a plugin is dinamikusan megkapja a legújabb állományokat, viszont a program telepítését meglehetősen megkönnyíti.
@@ -81,7 +95,7 @@ dictionary =  Dictionary[String,int]()
 
 \section{Geometriai adatok változásának kezelése}
 \subsection{Az AEGIS WorkingCopy}
-Az AEGIS verziókezelő moduljának külső interfésze az úgynevezett Working Copy, avagy munkapéldány. Ezen kereszült a következő funkciók érhetőek el:
+Az AEGIS verziókezelő moduljának külső interfésze az úgynevezett \textit{Working Copy}, avagy munkapéldány. Ezen kereszült a következő funkciók érhetőek el:
 \begin{enumerate}
 	\item Teljes revíziókezelő, és hozzá tartozó tároló létrehozása vagy betöltése, attól függően, hogy van-e már jelen egy
 	\item Geometriák hozzáadása az aktuális verzióhoz
@@ -92,12 +106,12 @@ Az AEGIS verziókezelő moduljának külső interfésze az úgynevezett Working 
 \end{enumerate}
 A WorkingCopy két hiányossággal rendelkezik a beépülő modulban való használathoz. Transzformációk előállítását nem támogatja, valamint az aktuális állapotát kifelé csak geometriák halmazaként biztosítja, ami a QGIS réteges megjelenítésében problémákat okozhat.
 \subsection{Az AEGIS WorkingCopyWrapper}
-A munkapéldány említett hiányosságainak pótlására jött létre a \texttt{WorkingCopyWrapper} osztály \todo{A típus és metódusneveket is szedd mindenhol monospace betűtípussal.}, amely a WorkingCopyhoz képest az alábbi többletfunkciókkal bír:
+A munkapéldány említett hiányosságainak pótlására jött létre a \texttt{WorkingCopyWrapper} osztály, amely a \texttt{WorkingCopy}-hoz képest az alábbi többletfunkciókkal bír:
 \begin{enumerate}
 	\item Eredeti és módosult geometria alapján transzformációk generálása, majd ezzel a workingcopy módosító függvényének használata
 	\item Egy egyedi azonosítókkal ellátott geometrialista biztosítása a lokális állapotról
 \end{enumerate}
-A rendeltetésszerű működéshez ez viszont nem elegendő, ugyanis a specifikációban felsorolt szükséges transzformációknak nem volt implementációja az AEGIS-ben, ebből kifolyólag generálásukra se volt lehetőség. Ezt az AEGIS Processing könyvtárának kiegészítésével orvosoltam. \todo{Ezt inkább úgy, hogy a szükséges műveleteket implementálni kellett itt és itt ...}
+A szükséges transzformációkat és generálásukat az AEGIS Processing könyvtárában kellett implementálni.
 \subsection{A transzformációk}
 A geometriák átalakító műveletek kialakítása az alábbi elven alapul:
 \begin{itemize}
@@ -115,43 +129,20 @@ Ahogy korábban is említésre került, az AEGIS a transzformációkat az IGeome
 Az összes módosítást leíró osztály rendelkezik ezen metódusok egyedi implementációival, melyek megfelelnek a saját geometriatípusaiknak.
 \subsection{A transzformációk generálása}:
 Az eredeti és módosított geometriákból transzformációk generálását az AEGIS Processing modulban található TransformationFactory statikus osztályok végzik.
-A transzformációk létrehozása a specifikációban leírt algoritmus alapján működik, ez legkönnyebben a multipont transzformáció generálásának kódjával szemléltethető:
-\lstset{caption={A MultiPointTransformationFactory Create metódusa}, label=src:multipointtransform}
+A transzformációk létrehozása a specifikációban leírt algoritmus alapján működik, ez az alábbi pseudokóddal szemléltethető:
+\lstset{caption={A transzformációgenerátorok általános algoritmusa}, label=src:transformgeneric}
 \begin{lstlisting}[language={[Sharp]C}]
-public static List<IGeometryTransformation<MultiPoint, MultiPoint>> Create(MultiPoint oldMultiPoint, MultiPoint newMultiPoint)
-{
-List<IGeometryTransformation<MultiPoint, MultiPoint>> result = new List<IGeometryTransformation<MultiPoint, MultiPoint>>();
-var pointTranslates = new Dictionary<int, PointTranslateTransformation<Point>>();
-for (int i = 0; i< Math.Min(oldMultiPoint.Count, newMultiPoint.Count);i++)
-{
-pointTranslates.Add(i, PointTranslateTransformation<Point>.Create(oldMultiPoint[i], newMultiPoint[i]));
-}
-result.Add(new MultiPointTranslateTransformation<MultiPoint>(pointTranslates));
-if (oldMultiPoint.Count < newMultiPoint.Count)
-{
-for (int i = 0; i < newMultiPoint.Count; i++)
-{
-if (i > oldMultiPoint.Count -1)
-{
-result.Add(new MultiPointAddPointTransformation<MultiPoint>(newMultiPoint[i], i));
-}
-}
-} else if (oldMultiPoint.Count > newMultiPoint.Count)
-{
-for(int i = 0; i< oldMultiPoint.Count; i++)
-{
-if (i > newMultiPoint.Count -1)
-{
-result.Add(new MultiPointRemovePointTransformation<MultiPoint>(oldMultiPoint[i], i));
-}
-}
-
-}
-
-return result;
-}
+set unmodifiedCount to number of parts in unmodified geometry
+set modifiedCount to number of parts in modified geometry
+set result to new empty transformation list
+for index := 0 to minimum(unmodifiedCount, modifiedCount) do
+	create transformation from parts on the index and add to result
+for index := unmodifiedCount to modifiedCount do
+	create addition for new parts and add to result
+for index := modifiedCount to unmodifiedCount do
+	create deletion for removed parts and add to result
+return the result
 \end{lstlisting}
-\todo{Valóban jobb lenne ezek helyére pseudokód vagy algoritmus.}
 Mint látható, a generáló függvény először létrehoz annyi résztranszformációt, amekkora részen még egyezik a két geometria hossza, majd a még nem, vagy már nem jelen lévő részgeometriák létrehozásának illetve eltávolításának műveleteit állítja elő. Az összes transzformációgenerátor hasonló módon működik.
 
 \section{A QgisWorkingCopy}
@@ -163,23 +154,23 @@ Az egész objektum egy Python szótár, amelyben a kulcsok a verziószámok, a h
 a QgisWorkingCopy tükrözi az AEGIS munkapéldány wrapper funkcionalitását, kiegészítve azokat az extra adatok karbantartásával. Példányosításakor ellenőrzi, hogy létezik-e a verziókezelő állományainak tárolására mappa, ha nem létrehozza, majd példányosítja a wrappert, szimpla fájl alapú tárolóval és kétirányú deltákat használó revízió kontrollerrel. Ezek után betölti az azonos mappában tárolt QWCData fájlból a szükséges további adatokat.
 A geometriák hozzáadása, módosítása és törlése egyszerűen a WorkingCopyWrapper azonos metódusait hívja meg, azonban a commit függvény hívásakor el kell tárolnia az extra adatokat. Ezen információk a Q-Aegis futása közben gyűlnek össze mely folyamat később lesz részletezve. A legtöbb adat kezelése nyílvánvaló, viszont a feature id-k karbantartása, valamint a verziók betöltése érdemel némi külön figyelmet.
 \subsubsection{A feature id probléma}
-A QGIS a rétegeken lévő objektumok azonosítóit a réteg tárolásától függően különböző módon kezeli (amire a dokumentációja nem sok említést tesz). Amennyiben memóriában tárolt a layer \todo{Erre azért van jól bevetett magyar szó: réteg}, a featureök indexelése 1-től kezdődik, és a műveletektől függetlenül nem változik. Shapefileban tárolt adatok esetén viszont 0-tól indul az indexelés, és objektum eltávolítása esetén az összes olyan azonosító, ami nagyobb volt nála, csökken eggyel, hogy egy folyamatos id állapot maradjon. Ezért amikor feature eltávolításokat kezelünk, és a réteg tárolója shapefile volt, minden törlés után az összes eltárolt nagyobb azonosítót dekrementálni kell eggyel.
+A QGIS a rétegeken lévő objektumok azonosítóit a réteg tárolásától függően különböző módon kezeli (amire a dokumentációja nem sok említést tesz). Amennyiben memóriában tárolt a réteg , a \textit{feature}-ök indexelése 1-től kezdődik, és a műveletektől függetlenül nem változik. \textit{Shapefileban} tárolt adatok esetén viszont 0-tól indul az indexelés, és objektum eltávolítása esetén az összes olyan azonosító, ami nagyobb volt nála, csökken eggyel, hogy egy folyamatos azonosító állapot maradjon. Ezért amikor \textit{feature} eltávolításokat kezelünk, és a réteg tárolója shapefile volt, minden törlés után az összes eltárolt nagyobb azonosítót dekrementálni kell eggyel.
 \subsubsection{Verzió betöltése, rétegek kezelése}
-Egy kiválasztott verzió betöltése a munkapéldányon keresztül történik, először a workingcopyt a megjeleníteni kívánt verzióra állítjuk, majd ebből lekérjük az aktuális geometria állapotot, amit a geometriák egyedi azonosítóiból és magukból a geometriákból álló párok formájában kapunk meg, C\# szótár formájában. Ezt az adott verzióhoz tartozó extra adat objektum segítségével feldolgozzuk olyan módon, hogy rendelkezésünkre álljon az összes megjeleníteni kívánt réteg létrehozásához szükséges adat, valamint összepárosítjuk a keyDict segítségével a geometriákat a layereken kirajzolandó featureökkel. Ezt követően a rétegadatok alapján létrehozzuk a valódi QGIS layereket, feltöltjük őket az adott verzióban lévő állapotukkal, majd ezeket jelenítjük meg a QGIS grafikus felületén.
+Egy kiválasztott verzió betöltése a munkapéldányon keresztül történik, először a \textit{workingcopy}-t a megjeleníteni kívánt verzióra állítjuk, majd ebből lekérjük az aktuális geometria állapotot, amit a geometriák egyedi azonosítóiból és magukból a geometriákból álló párok formájában kapunk meg, C\# szótár formájában. Ezt az adott verzióhoz tartozó extra adat objektum segítségével feldolgozzuk olyan módon, hogy rendelkezésünkre álljon az összes megjeleníteni kívánt réteg létrehozásához szükséges adat, valamint összepárosítjuk a \texttt{keyDict} segítségével a geometriákat a layereken kirajzolandó featureökkel. Ezt követően a rétegadatok alapján létrehozzuk a valódi QGIS rétegeket, feltöltjük őket az adott verzióban lévő állapotukkal, majd ezeket jelenítjük meg a QGIS grafikus felületén.
 
 \section{A QAEGIS osztály}
-A tényleges beépülő modul maga a QAEGIS Python osztály, melynek váza a QGIS-hez írt plugin builder beépülővel lett generálva. Ez biztosítja, hogy az alap szerkezete megfelelő legyen az alapprogramba való integráláshoz, és minden szükséges metaadattal rendelkezzen. Ebben az osztályban férünk hozzá a QGIS interfészéhez, amin belül az aktuális projekt példánnyal dolgozik a modul. Mivel a QGIS grafikus felülete a Qt szoftverkönyvtáron alapul, ezért az események kezelésére az úgynevezett \emph{szignálokat} \todo{signal -> szignál mindenhol} használjuk fel. A signalokat a felhasználó tevékenységei váltják ki, és egy adott információhalmazt adnak, amire ráköthetünk saját implementálású feldolgozófüggvényeket. A signalok és kezelésük áttekintésével könnyen megérthető a beépülő modul működése.
-\subsection{Signalok és feldolgozásuk}
-\subsubsection{A QGIS interfész projekt megnyitási signal}
-Ezen jelzést használja a modul a munkapéldány megnyitására, amely folyamat vagy létrehoz egy új üres revíziókezelőt, vagy ha létezik a megnyitott projekthez egy, betölti azt. Ezen signal kezelése során jönnek létre azok a listák is amik követik az aktuális szerkestésekben a rétegek és featureök létrehozását és törlését.
-\subsubsection{A projekt példány réteg signaljai}
-Az aktuálisan megnyitott projekt réteg létrehozásakor vagy törlésekor egy jelzés formájában ad információkat a végzett műveletről. Ezeket kezelve kerülnek a bufferlistákba az elvégzett műveletek. A bufferekre azért van szükség, mert a projekt mentéséig nem tekinthető véglegesnek a réteg jelenléte vagy eltávolítása, ezért amíg nem mentett állapotban vannak, nem kerülnek be a revíziókezelésbe. A réteg törléséhez tartozó signal kezelésekor nem csak a rétegadatok eltávolítása kerül a bufferbe, hanem az összes rajta lévő objektum törlése is, így ha a layer már nincs jelen, a tartalma se marad felesleges adatként a rendszerben.
-\subsubsection{A projekt mentésének signalja}
+A tényleges beépülő modul maga a QAEGIS Python osztály, melynek váza a QGIS-hez írt plugin builder beépülővel lett generálva. Ez biztosítja, hogy az alap szerkezete megfelelő legyen az alapprogramba való integráláshoz, és minden szükséges metaadattal rendelkezzen. Ebben az osztályban férünk hozzá a QGIS interfészéhez, amin belül az aktuális projekt példánnyal dolgozik a modul. Mivel a QGIS grafikus felülete a Qt szoftverkönyvtáron alapul, ezért az események kezelésére az úgynevezett \emph{szignálokat} használjuk fel. A szignálokat a felhasználó tevékenységei váltják ki, és egy adott információhalmazt adnak, amire ráköthetünk saját implementálású feldolgozófüggvényeket. A szignálok és kezelésük áttekintésével könnyen megérthető a beépülő modul működése.
+\subsection{Szignálok és feldolgozásuk}
+\subsubsection{A QGIS interfész projekt megnyitási szignál}
+Ezen jelzést használja a modul a munkapéldány megnyitására, amely folyamat vagy létrehoz egy új üres revíziókezelőt, vagy ha létezik a megnyitott projekthez egy, betölti azt. Ezen szignál kezelése során jönnek létre azok a listák is amik követik az aktuális szerkestésekben a rétegek és featureök létrehozását és törlését.
+\subsubsection{A projekt példány réteg szignáljai}
+Az aktuálisan megnyitott projekt réteg létrehozásakor vagy törlésekor egy jelzés formájában ad információkat a végzett műveletről. Ezeket kezelve kerülnek a bufferlistákba az elvégzett műveletek. A bufferekre azért van szükség, mert a projekt mentéséig nem tekinthető véglegesnek a réteg jelenléte vagy eltávolítása, ezért amíg nem mentett állapotban vannak, nem kerülnek be a revíziókezelésbe. A réteg törléséhez tartozó szignál kezelésekor nem csak a rétegadatok eltávolítása kerül a bufferbe, hanem az összes rajta lévő objektum törlése is, így ha a layer már nincs jelen, a tartalma se marad felesleges adatként a rendszerben.
+\subsubsection{A projekt mentésének szignálja}
 A projekt mentésekor tekinthető ténylegesen elvégzettnek egy layer törlése vagy felvétele, ezért ezen jelzés kiváltásakor kerülnek ezek a módosítások a munkapéldányba. Új rétegek esetén a rajtuk végzett geometriaműveletek mentésig nem relevánsak -hiszen ha elvetnénk a mentésüket, az összes rajtuk lévő objektum is törlésre kerülne-, így mentés után kerül be minden feature is új geometriaként az AEGIS rendszerbe.
 \subsubsection{Réteg mentésekor kiváltott jelzések}
-Fontos megjegyezni, hogy a rétegek rendelkeznek az egyes műveletek végrehajtásakor megjelenő signalokkal is, viszont ezek nem biztos hogy mentésre is kerülnek, így hasonlóan a rétegműveletek buffereléséhez, ezek is egy köztes állapotban tárolódnak a véglegesítésükig. Szerencsére ezt a funkciót maga a QGIS biztosítja, így a függőben lévő műveletek tárolását nem szükséges újraimplementálni.A rétegen végzett műveletek mentésekor három különböző jelzés kerül feldolgozásra.
+Fontos megjegyezni, hogy a rétegek rendelkeznek az egyes műveletek végrehajtásakor megjelenő szignálokkal is, viszont ezek nem biztos hogy mentésre is kerülnek, így hasonlóan a rétegműveletek buffereléséhez, ezek is egy köztes állapotban tárolódnak a véglegesítésükig. Szerencsére ezt a funkciót maga a QGIS biztosítja, így a függőben lévő műveletek tárolását nem szükséges újraimplementálni.A rétegen végzett műveletek mentésekor három különböző jelzés kerül feldolgozásra.
 \begin{list}{}{}
-	\item $\bullet$ \textbf{Hozzáadott featureök mentése}: Ezen signal szolgáltatja az adatokat az újonnan létrehozott geometriákról, így ezen keresztül kerülnek be az új téradatok a verziókezelésbe. Érdemes kiemelni itt az alábbi kódrészletet : 
+	\item $\bullet$ \textbf{Hozzáadott featureök mentése}: Ezen szignál szolgáltatja az adatokat az újonnan létrehozott geometriákról, így ezen keresztül kerülnek be az új téradatok a verziókezelésbe. Érdemes kiemelni itt az alábbi kódrészletet : 
 	\lstset{caption={A multigeometria réteg probléma kezelése}, label=src:python}
 	\begin{lstlisting}[language={python}]
 	geomToAdd = feature.geometry()
@@ -192,25 +183,23 @@ Fontos megjegyezni, hogy a rétegek rendelkeznek az egyes műveletek végrehajt�
 	Erre azért van szükség, mert amennyiben a réteg multigeometriákkal dolgozik, új geometria létrehozásakor -valamilyen ismeretlen okból- még szimpla téradatként kezeli azokat, viszont bármilyen módosítást végzünk rajtuk, átalakítja az egyszerű alakzatokat egyelemű többszörös változataikká. Ez komoly problémákat tud okozni a módosítások kezelésénél, hiszen követetlenül változik meg a geometria típusa. Ezért ellenőrzi a program, hogy a réteg geometriatípusa többszörös-e, amit a 4,5,6 kódokkal jelöl, és ha igen, akkor még az új adat bekerülése előtt konvertálja azt multigeometria formába.
 	\item $\bullet$ \textbf{Eltávolított featureök mentése}: A geometriák eltávolításakor problémás, hogy az újonnan létrehozott adatokat mentésükig ideiglenes azonosítóval kezeli a QGIS, és mentéskor ezeket az ideiglenes változatokat törli, és felveszi véglekesként. Mivel az ideiglenes verzióik nem szerepelnek a verziókövetésben, így ha az eltávolításukat próbálnánk feldolgozni, hibára futnánk. Ezt kiküszöbölendő kihasználjuk az ideiglenes featureök egy tulajdonságát. Amíg a már véglegesített objektumok tárolás módjától függően 0-tól vagy 1-től kezdve kapnak azonosítót, ideiglenes verzióik a negatív irányba kapnak ID-t, ezért ha egy feature id-ja 0 vagy 1 alatti, ideiglenesnek tekinthető. Ennek felhasználásával megfelelő módon eltávolíthatóak a ténylegesen a felhasználó által törölt téradatok.
 	\item $\bullet$ \textbf{Módosítótt geometriák mentése}: A módosított geometriák kezelése elég egyértelmű mivel a valódi változáskezelést az AEGIS kiegészítései biztosítják, az egyedüli plusz ellenőrzés ami belekerült azt vizsgálja, hogy a módosított geometria mentetlen rétegen foglal-e helyet, és ha igen, nem tekintjük módosításnak, hiszen még nem került be a rendszerbe.
+\subsubsection{A projekt bezárásának szignálja}
+A projekt bezárásakor fontos, hogy az összes jelzésről leiratkozzon a program, ugyanis ennek hiányában a QGIS implementációjából kifolyólag egy másik projekt megnyitásakor a különböző szignálok többszörösen kerülnének kezelésre, ami nem kívánt működéshez vezet.
 \end{list}
 \subsection{A kezelőfelület és eseményei}
 A kezelőfelület alapja a plugin generátor által létrehozott Qt ablak, amely Qt designer segítségével lett végleges formájára alakítva. A felület tervezésekor a fő szempont az volt hogy annyira egyszerű és intuitív legyen amennyire az csak lehetséges, így végül mindössze két elemmel vezérelhetővé vált a teljes verziókezelés
 \begin{enumerate}
 	\item \textbf{A commit gomb}: Az aktuális verzió mentésére szolgáló gomb kettős funkciót tölt be. Az általánosabb, hogy ha már kezelt projekttel dolgozuk, megnyomásakor változtatásaink véglegesítésre kerülnek a revíziókezelő modulban, és létrejön egy újabb verzió. Másik funckióját abban az esetben látja el, ha egy létező, de még nem verziókezelt projekt van megnyitva. Ekkor megnyomásával a projekt teljes szerkezete, azaz rétegei és azok tartalma bekerülnek a friss munkapéldányba mint kiindulási verzió.
-	\item \textbf{A verzióválasztó lista, és a hozzá tartozó betöltés gomb}: A verzióválasztó lista nem jelenik meg a kezelőfelületen addig, amíg a munkapéldány nem rendelkezikbetölthető verzióval. Amennyiben már használható, a kívánt verziószámot kiválasztva és a betöltőgombra kattintva elindul a kiválasztott revízió megjelenítése. Mivel a verziómegjelenítés implementációjából fakadóan elveti az összes aktuális módosítást amit esetlegesen még nem mentett a felhasználó, ezért amennyiben vannak ilyen függőben lévő műveletek, a program felajánlja azok mentését egy új verzióba a betöltés megkezdése előtt.
+	\item \textbf{A verzióválasztó lista vagy beviteli mező, és a hozzá tartozó betöltés gomb}: A verzióválasztó vezérlőelem nem jelenik meg a kezelőfelületen addig, amíg a munkapéldány nem rendelkezikbetölthető verzióval. Amennyiben már használható, a kívánt verziószámot kiválasztva és a betöltőgombra kattintva elindul a kiválasztott revízió megjelenítése. Mivel a verziómegjelenítés implementációjából fakadóan elveti az összes aktuális módosítást amit esetlegesen még nem mentett a felhasználó, ezért amennyiben vannak ilyen függőben lévő műveletek, a program felajánlja azok mentését egy új verzióba a betöltés megkezdése előtt.
+	\begin{note}
+	A verzióválasztó elem attól függően, hogy mennyi verzió érhető el, két alakot vehet fel : kevesebb verzió esetén egy legördülő menü, bizonyos darabszám fölött pedig egy léptethető szám beviteli mező. Lista esetén egyértelműen nem választható ki hibás adat, léptetőmező esetén pedig megfelelő minimum és maximum értékek megkötésével biztosított, hogy nem ad meg a felhasználó nem létező verziószámot.
+	\end{note}
 \end{enumerate}
 
 \section{Adatátvitel Python és C\# közt}
 A geometriák ugyan az AEGIS és a QGIS rendszerekben is szabványosan vannak kezelve, viszont a megvalósításaik különbözőek. Az ebből adódó problémák elkerülése érdekében a geometriák a legtöbb helyen a WKT reprezentációjukban, szövegesen kerülnek átadásra. Ezen kívül az AEGISben a geometriákhoz rendelt egyedi azonosító is használva van néhány helyen az objektumok kiválasztására. Erre azért van szükség, mert az AEGIS a geometriák közti ellenőrzésekor sokkal pontosabb adatokkal dolgozik mint a QGIS és ezek az eltérések sokszor nem várt viselkedéseket eredményeztek, például geometriák módosításakor a verziókezelő modul ellenőrzi, hogy van-e a módosított geometriával egyező a tárolóban, és ha nem talál ilyet, akkor szimplán felveszi újként, ami a pontatlanságok miatt lehetetlenné tette a módosítások hatékony követését, ezért módosításkor az eredeti állapotot közvetlenül kulcs alapján szedi ki a rendszer a tárolóból, ahelyett hogy a QGIS reprezentációval egyező geometriát keresne.
 
-\section{Egyéb segédeljárások} \todo{Ez szerintem elhagyható.}
-A szoftver rendelkezik néhány adatátalakító eljárással, ezek a következőek:
-\begin{enumerate}
-	\item Aegis geometria reprezentációt QGIS reprezentációvá alakító függvény és inverze, a geometriák Well Known Text reprezentációját használják.
-	\item C\# szótárat 
-\end{enumerate}
 
-\section{A program szerkezete} \todo[inline]{Amennyiben ez egyfajta projektszerkezet lenne, akkor inkább a fejezet elejére kerüljön.}
 \subsection{A nyers programkód}
 A létrehozott programkód szerkezete szétválasztható a C\#-ban valamint a Pythonban írt részekre.\\
 A C\# nyelven implementált kód az alábbi struktúrát követi:
@@ -229,25 +218,92 @@ A Python kód a qaegis mappában található, az alábbi szerkezetel:
 A beépülő modul működéséhez szükséges az AEGIS csomag dllekké fordított verziója a plugin könyvtáron belüli aegis mappában kapott helyet, a lefordított Python.NET CLR modul pedig az azonos szülőmappájú \texttt{pythonnet} könyvtárban található.
 
 \section{A működésben lévő beépülő modul könyvtárszerkezete}
-A használatban lévő plugin a QGIS Python beépülőket tartalmazó mappájában található, ebben a könyvtárban van minden szükséges állomány. A tényleges verziókezelést biztosító tárolók a repositories alkönyvtárban kerülnek létrehozásra, ezen belül pedig a kezelt projekt nevével megegyező mappákban találhatóak a szükséges fájlok. Ezen belül a changesets mappa verziószámokkal elnevezett forrásaiban találhatóak a revíziókhoz tartozó változáslisták, a snapshots mappa tartalmazza az esetlegesen mentett verzióállapotokat, a revisioncontrol fájl pedig az összes többi használt adatnak ad helyet. A QWCData állomány tartalma az összes AEGIS-en kívüli követendő adat szerializált formája.
+A használatban lévő plugin a QGIS Python beépülőket tartalmazó mappájában található, ebben a könyvtárban van minden szükséges állomány. A tényleges verziókezelést biztosító tárolók a kezelt projektet tartalmazó mappában kerülnek létrehozásra, egy \texttt{projektnév\_qaegis\_repository} nevű mappában, ezen belül pedig a kezelt projekt nevével megegyező mappákban találhatóak a szükséges fájlok. Ezen belül a changesets mappa verziószámokkal elnevezett forrásaiban találhatóak a revíziókhoz tartozó változáslisták, a snapshots mappa tartalmazza az esetlegesen mentett verzióállapotokat, a revisioncontrol fájl pedig az összes többi használt adatnak ad helyet. A QWCData állomány tartalma az összes AEGIS-en kívüli követendő adat szerializált formája.
 
 \section{Tesztelés}
-Sajnos a beépülő modul tesztelése korántsem volt alapos \todo{Ilyet le ne írj, hacsak nem kifejezetten kéred, hogy pontozzák le a dolgozatod.}, csupán felhasználói tesztek lettek végrehajtva, azaz a program működése a használatával lett ellenőrizve. Ezek alapján az alábbi eredmények születtek.
-\begin{enumerate}
-	\item A modul hozzáadása, betöltése hiba nélkül működik
-	\item A projektek verziókezelésének inicializálása üres, és meglévő munka esetén is végrehajtható
-	\item A rétegek létrehozása, törlése verziókezelt
-	\item Tetszőleges korábbi vagy új verzió betölthető, megfelelő rétegállapotok jönnek létre
-	\item A geometriák létrehozása és törlése működik
-	\item A geometriák módosításának megfelelő transzformációk kerülnek létrehozásra és tárolásra
-\end{enumerate}
+A tesztelés hagyományos feketedoboz típusú tesztelésként történt, az alábbi tesztelési terv mentén:
+\begin{center}
+	\begin{longtable}{ | p{0.5\textwidth} | p{0.5\textwidth} | }
+		
+		\hline
+		\emph{Végrehajtott művelet} & \emph{Várt viselkedés}
+		\\ \hline \hline
+		\endfirsthead % első oldal fejléce
+		
+		\hline
+		\emph{Végrehajtott művelet} & \emph{Várt viselkedés}
+		\\ \hline \hline
+		\endhead % többi oldal fejléce
+		
+		
+		\emph{Megnyitott projekt nélkül a verziókezelő ablak megnyitása}
+		& Az ablak nem nyílik meg, a felhasználó kap egy üzenetet, hogy projekten kívül nem használhatóak a verziókezelési funkciók
+		\\ \hline
+		
+		\emph{Új projekt létrehozása mentés nélkül}
+		& Hibaüzenet jelenik meg, ami jelzi a felhasználónak, hogy projektfájl nélkül nem használható a verziókezelés
+		\\ \hline
+		
+		\emph{Új projekt létrehozása mentéssel}
+		& A projekt mentésre kerül, elérhető a verziókezelő ablak, a verzióválasztó és a betöltőgomb nélkül
+		\\ \hline
+		
+		\emph{A commit gomb megnyomása a legutóbbi verzión álló verziókezeléssel}
+		& Az előző verzió óta végrehajtott változtatások mentésre kerülnek, bezárul a verziókezelő ablak, a felhasználó kap egy üzenetet, hogy a mentés sikeres.
+		\\ \hline
+		
+		\emph{A commit gomb megnyomása régebbi verzión álló verziókezeléssel}
+		& A változtatások mentése nem történik meg, a felhasználót hibaüzenet értesíti arról, hogy csak a legutóbbi verzión menthetőek módosítások.
+		\\ \hline
+		
+		\emph{Nem verziókezelt projekt megnyitása, majd a commit gomb megnyomása}
+		& A projekt megnyitásakor létrejön egy üres tároló, a commit gomb megnyomása után az összes réteg és tartalmuk bekerül a verziókezelésbe
+		\\ \hline
+		
+		\emph{Verziókezelt projekt megnyitása}
+		& A projekt betöltése után a verziókezelő a legutóbbi állapotra áll, elérhető a korábbi verziók betöltése, valamint a módosítások mentése.
+		\\ \hline
+		
+		\emph{Korábbi verzió betöltése, mentetlen módosítások nélkül}
+		& A régebbi állapotnak megfelelően létrejönnek a rétegek és a rajtuk lévő geometriák, a verziókezelő ablak bezárul.
+		\\ \hline
+		
+		\emph{Korábbi verzió betöltése, mentetlen módosításokkal}
+		& A program megnyit egy párbeszédablakot, amelyben figyelmezteti a felhasználót, hogy a verzió betöltésével a még nem commitolt módosításai elvesznek, és felajánlja ezek mentését. Ezután a verzió betöltése megtörténik.
+		\\ \hline
+		
+		\emph{Bármilyen aktuális verziószám változásával járó művelet}
+		& Az aktuális verziót feltűntető mező a megváltozottra frissül
+		\\ \hline
+		
+		\emph{Réteg hozzáadása a projekthez, majd a változtatások mentése}
+		& A réteg hozzáadása mentésre kerül, a létrehozás verziójától kezdve betöltésnél megjelenik
+		\\ \hline
+		
+		\emph{Réteg eltávolítása a projektből, majd a változtatások mentése}
+		& A réteg törlése mentésre kerül, a törlés verziójától kezdve betöltésnél nem jelenik meg
+		\\ \hline
+		
+		\emph{Geometriák módosítása, a réteg mentése, majd a változtatások commitolása}
+		& A geometriák módosítása mentésre kerül, minden verzióban az adott verziónak megfelelő állapotban kerülnek betöltésre
+		\\ \hline
+		
+		\emph{Geometriák módosítása, a réteg mentése nélkül, majd a változtatások commitolása}
+		& A módosítások nem kerülnek mentésre (mivel nem véglegesek)
+		\\ \hline
+		
+		
+		
+		\caption{A tesztelési terv}
+		\label{tab:example-3}		
+	\end{longtable}
+\end{center}
 
 \section{Továbbfejlesztési lehetőségek}
 \subsection{Az AEGIS továbbfejlesztési lehetőségei}
 Az AEGIS szerkezetéből adódóan számos lehetőséget biztosít további funkciók létrehozására:
 \begin{enumerate}
 	\item A geometriákhoz tartozó egyéb metaadatok módosítására létre lehetne még hozni új transzformációs osztályokat, ezáltal ezek is kezelhetőek lennének
-	\item A repository osztályt ki lehetne bővíteni olyan módon, hogy ne nyers fájlokban tárolja az adatait, hanem valamilyen hálózati úton, így eszközök közötti kommunikáció is megvalósítható lenne.\todo[inline]{Ehhez igazából csak le kell származtatni a IRevisionControl interfészből egy megfelelő megvalósítást. A WCF-es projektekben van is erre konkrét példa, ld. RevisionControlService osztályt például. Szóval ilyen van már amúgy.}
 	\item A módosítások kezelését tovább lehetne fejleszteni olyan adatok hozzáadásával, mint a szerkesző felhasználó azonosítója, ezzel alkalmasabbá téve a verziózást több ember által végzett projektek esetén is.
 	\item Esetlegesen a rétegrendszer implementálható lenne az AEGIS-en belül, mivel a legtöbb vektorgrafikus szoftver hasonló elven működik, így nem az alkalmazás részben kéne ezeket az információkat kezelni.
 \end{enumerate}
@@ -262,21 +318,20 @@ Az AEGIS szerkezetéből adódóan számos lehetőséget biztosít további funk
 \subsection{Külső könyvtárak használata}
 Számomra az egyik legnagyobb nehézséget az jelentette, hogy a jellegéből adódóan az általam írt alkalmazásnak idomulnia kellett mind a QGIS, az AEGIS és a Python.NET sajátosságaihoz is. Ez a felhasznált algoritmusok tervezésekor sokszor nehézséget jelentett. Ezen kívül problémás volt a QGIS API dokumentációja is, sok technikai részletről nem tesz említést, így az ezek által okozott problémák csak tesztelés során váltak láthatóvá, valamint sok helyen nem pontosan úgy viselkedtek a QGIS funkciói, ahogyan azok dokumentálva voltak.
 \subsection{A Python.NET fordítási nehézségei}
-\todo[inline]{Teljesen biztos vagy benne, hogy a nyelvi beállítás okozta a hibát? Mert ilyet csak akkor írj le, ha ez 100\%.}
+\todo[inline]{Teljesen biztos vagy benne, hogy a nyelvi beállítás okozta a hibát? Mert ilyet csak akkor írj le, ha ez 100\%. -- Igen, konkrétan a pythonnet vagy az általa használt modul hivatalos oldalán volt feltüntetve, hogy ismert hiba, és ez okozza}
 A Python.NET CLR moduljának használatához le kellett azt fordítani, ami sokkal nehezebb feladatnak bizonyult mint elsőre számítottam volna.A fordítója számos dependenciával dolgozik, és ezek nem várt hibákkal rendelkeztek. A legmeglepőbb talán az volt, amikor kiderült, hogy a modul nem fordul le olyan operációs rendszeren aminek a rendszernyelve nem angol. Mivel a Windows csak a megjelenítési nyelv változtatását támogatja, a fejlesztés érdekében az egész operációs rendszeremet le kellett cserélni egy angol nyelvű verzióra.
 
 
 
 \section{Fogalomtár}
 \label{sec:definitions}
-\todo[inline]{A definíciókat nem igazán ilyen célra szokás használni. Lehetne esetleg külön nomenklatúra (jelölés-/elnevezésjegyzék) függelék, de most egy egyszerű description lista is elég lesz szerintem.}
 
 \begin{description}
 	\item[Feature]: A QGIS geometriai egysége, a layeren tárolt geometria és az összes hozzá tartozó egyéb adat.
 
 	\item[Geometriatípus]: A szabványos geometrialeírás típusainak egyike, lehetséges értékei Point, MultiPoint, LineString, MultiLineString,Polygon,MultiPolygon
 
-	\item[Geometria "hossza"]: A geometria közvetlen részgeometriáinak száma. Vonal esetén a pontjainak száma, sokszög esetén 1 (azaz a héj számossága) + a hozzáadott lyukak száma stb.\todo{Ezt "hossz" helyett inkább komponensek számának vagy hasonlónak hívhatnánk, szerintem félrevezető ez a "hossz".}
+	\item[Geometria komponenseinek száma]: A geometria közvetlen részgeometriáinak száma. Vonal esetén a pontjainak száma, sokszög esetén 1 (azaz a héj számossága) + a hozzáadott lyukak száma stb.
 
 	\item[Geometria részgeometriái]: Pont geometriának nincs részgeometriája. Vonal geometria részei a pontok amelyek összekötésével megkapjuk a vonalat. Sokszög esetén az alakzat külső héja, valamint a síkidomon lévő lyukak, ezek vonalakkal írhatóak le. Multigeometriák részgeometriái az egyes különálló részeik.
 
