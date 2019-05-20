@@ -1,14 +1,10 @@
 \chapter{Fejlesztői dokumentáció}
 \label{ch:impl}
-\todo[inline]{A fejlesztői dokumentációba kerülhetne leírás a projekt fordításáról, mert nem volt triviális ugyebár.}
 
 \section{A feladat specifikálása}
-A beépülő modul célja a téradatok verziókezelésének megvalósítása a QGIS-en belül az AEGIS keretrendszer segítségével. Ez szétválasztható a QGIS és az AEGIS közti technológiai különbségek áthidalására, a tényleges geometriamódosítások kezelésére, valamint ezek összekötésére a QGIS-es reprezentációjukkal.
+A beépülő modul célja a téradatok verziókezelésének megvalósítása a QGIS-en belül az AEGIS keretrendszer segítségével. Ez szétválasztható egy \emph{back-end} részre, ami a verziókezelésért valamint az adatok és transzformációk tárolásáért felel, és egy \emph{front-end} részre, ami egyrészt grafikus felhasználói felületet biztosít, valamint felel az adatreprezentációs és architekturális különbségek áthidalásáért.
 \todo[inline]{Ezt inkább úgy kellene megfogalmazni, hogy van egy backend (AEGIS), ami a verziókezelésért, az adatok és a transzformációk tárolásáért felel; valamint egy frontend (QGIS plugin), ami egyrészt a GUI-t nyújtja, másrészt felel az architekturális és adatreprezentációs különbségek áthidalásáért (pl. layerek). Továbbá a Python.NET nyújtja a .NET szoftverkönyvtár eljárásainak meghívási lehetőségét Python kódból.\\
 Ezt ennek megfelelően kellene végigvezetni a teljes dolgozaton. Valójában nem a technológiák közötti áthidalást kellett megoldani (arra ott volt a Python.NET), hanem reprezentációs különbségek voltak.}
-
-\subsection{Technológiák összekötése}
-A QGIS Python nyelvet használó interfészt biztosít az extra funkciók megvalósítására, az AEGIS keretrendszer pedig a C\# alapú Microsoft.NET keretrendszerben íródott, ezen két technológiát kell valahogy egyesíteni.
 
 \begin{figure}[H]
 	\centering
@@ -21,11 +17,11 @@ A QGIS Python nyelvet használó interfészt biztosít az extra funkciók megval
 A geometriák tárolása, betöltése, valamint eltávolításuk kezelése mind az AEGIS létező funkciói voltak a projekt kezdeténél, így a tényleges feladat, a transzformációk definiálása, és létrehozása.
 Az átalakítások tervezése közben az a fő szempont, hogy a lehető legáltalánosabbak legyenek, és minden lehetséges módosítás leírható legyen véges alkalmazásukkal. Ezt a törekvést segíti az, hogy az AEGIS geometriatípusai megfelelnek a \emph{Simple Feature Access} (röviden \emph{SFA}) standardnak \cite{sfa}, ezáltal egy adott hierarchiával rendelkeznek: A pontok különálló típust képeznek, A vonalak koordináták sorozatai, amik hasonlóan viselkednek a pontokhoz, a sokszögek pedig gyűrűkkel vannak leírva, amik a vonalak speciális változatai, így az "alacsonyabb szintű" geometriák transzformációi felhasználhatóak a bonyolultabb térobjektumok átalakításainak leírásához is.
 \begin{note}
-A \textit{Simple Feature Access} geometriák tárolására és elérésére kialakított két részből álló szabvány. Az első rész (SFA-CA azaz \textit{Common Architecture}) egy modellt definiál a két dimenziós geometriáknak pontok közti lineáris interpolációval. Ez a rész definiálja WKT és WKB szabványos reprezentációkat is. A második rész a szabvány SQL alapú implementációját írja le. Az SFA standard az OGC (\textit{Open Geospatial Consortium}) és az ISO (\textit{International Organization for Standardization}) szervezetek által elfogadott.
+A \emph{Simple Feature Access} geometriák tárolására és elérésére kialakított két részből álló szabvány. Az első rész (SFA-CA azaz \emph{Common Architecture}) egy modellt definiál a két dimenziós geometriáknak pontok közti lineáris interpolációval. Ez a rész definiálja WKT és WKB szabványos reprezentációkat is. A második rész a szabvány SQL alapú implementációját írja le. Az SFA standard az OGC (\emph{Open Geospatial Consortium}) és az ISO (\emph{International Organization for Standardization}) szervezetek által elfogadott.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth,height=220px]{images/sfa.png}
-	\caption{A \textit{Simple Feature Access} objektum-relációs modellje}
+	\caption{A \emph{Simple Feature Access} objektum-relációs modellje}
 	\label{fig:picture-8}
 \end{figure}
 \end{note}
@@ -95,7 +91,7 @@ dictionary =  Dictionary[String,int]()
 
 \section{Geometriai adatok változásának kezelése}
 \subsection{Az AEGIS WorkingCopy}
-Az AEGIS verziókezelő moduljának külső interfésze az úgynevezett \textit{Working Copy}, avagy munkapéldány. Ezen kereszült a következő funkciók érhetőek el:
+Az AEGIS verziókezelő moduljának külső interfésze az úgynevezett \texttt{Working Copy}, avagy munkapéldány. Ezen kereszült a következő funkciók érhetőek el:
 \begin{enumerate}
 	\item Teljes revíziókezelő, és hozzá tartozó tároló létrehozása vagy betöltése, attól függően, hogy van-e már jelen egy
 	\item Geometriák hozzáadása az aktuális verzióhoz
@@ -154,9 +150,9 @@ Az egész objektum egy Python szótár, amelyben a kulcsok a verziószámok, a h
 a QgisWorkingCopy tükrözi az AEGIS munkapéldány wrapper funkcionalitását, kiegészítve azokat az extra adatok karbantartásával. Példányosításakor ellenőrzi, hogy létezik-e a verziókezelő állományainak tárolására mappa, ha nem létrehozza, majd példányosítja a wrappert, szimpla fájl alapú tárolóval és kétirányú deltákat használó revízió kontrollerrel. Ezek után betölti az azonos mappában tárolt QWCData fájlból a szükséges további adatokat.
 A geometriák hozzáadása, módosítása és törlése egyszerűen a WorkingCopyWrapper azonos metódusait hívja meg, azonban a commit függvény hívásakor el kell tárolnia az extra adatokat. Ezen információk a Q-Aegis futása közben gyűlnek össze mely folyamat később lesz részletezve. A legtöbb adat kezelése nyílvánvaló, viszont a feature id-k karbantartása, valamint a verziók betöltése érdemel némi külön figyelmet.
 \subsubsection{A feature id probléma}
-A QGIS a rétegeken lévő objektumok azonosítóit a réteg tárolásától függően különböző módon kezeli (amire a dokumentációja nem sok említést tesz). Amennyiben memóriában tárolt a réteg , a \textit{feature}-ök indexelése 1-től kezdődik, és a műveletektől függetlenül nem változik. \textit{Shapefileban} tárolt adatok esetén viszont 0-tól indul az indexelés, és objektum eltávolítása esetén az összes olyan azonosító, ami nagyobb volt nála, csökken eggyel, hogy egy folyamatos azonosító állapot maradjon. Ezért amikor \textit{feature} eltávolításokat kezelünk, és a réteg tárolója shapefile volt, minden törlés után az összes eltárolt nagyobb azonosítót dekrementálni kell eggyel.
+A QGIS a rétegeken lévő objektumok azonosítóit a réteg tárolásától függően különböző módon kezeli (amire a dokumentációja nem sok említést tesz). Amennyiben memóriában tárolt a réteg , a \emph{feature}-ök indexelése 1-től kezdődik, és a műveletektől függetlenül nem változik. \emph{Shapefileban} tárolt adatok esetén viszont 0-tól indul az indexelés, és objektum eltávolítása esetén az összes olyan azonosító, ami nagyobb volt nála, csökken eggyel, hogy egy folyamatos azonosító állapot maradjon. Ezért amikor \emph{feature} eltávolításokat kezelünk, és a réteg tárolója shapefile volt, minden törlés után az összes eltárolt nagyobb azonosítót dekrementálni kell eggyel.
 \subsubsection{Verzió betöltése, rétegek kezelése}
-Egy kiválasztott verzió betöltése a munkapéldányon keresztül történik, először a \textit{workingcopy}-t a megjeleníteni kívánt verzióra állítjuk, majd ebből lekérjük az aktuális geometria állapotot, amit a geometriák egyedi azonosítóiból és magukból a geometriákból álló párok formájában kapunk meg, C\# szótár formájában. Ezt az adott verzióhoz tartozó extra adat objektum segítségével feldolgozzuk olyan módon, hogy rendelkezésünkre álljon az összes megjeleníteni kívánt réteg létrehozásához szükséges adat, valamint összepárosítjuk a \texttt{keyDict} segítségével a geometriákat a layereken kirajzolandó featureökkel. Ezt követően a rétegadatok alapján létrehozzuk a valódi QGIS rétegeket, feltöltjük őket az adott verzióban lévő állapotukkal, majd ezeket jelenítjük meg a QGIS grafikus felületén.
+Egy kiválasztott verzió betöltése a munkapéldányon keresztül történik, először a \emph{workingcopy}-t a megjeleníteni kívánt verzióra állítjuk, majd ebből lekérjük az aktuális geometria állapotot, amit a geometriák egyedi azonosítóiból és magukból a geometriákból álló párok formájában kapunk meg, C\# szótár formájában. Ezt az adott verzióhoz tartozó extra adat objektum segítségével feldolgozzuk olyan módon, hogy rendelkezésünkre álljon az összes megjeleníteni kívánt réteg létrehozásához szükséges adat, valamint összepárosítjuk a \texttt{keyDict} segítségével a geometriákat a layereken kirajzolandó featureökkel. Ezt követően a rétegadatok alapján létrehozzuk a valódi QGIS rétegeket, feltöltjük őket az adott verzióban lévő állapotukkal, majd ezeket jelenítjük meg a QGIS grafikus felületén.
 
 \section{A QAEGIS osztály}
 A tényleges beépülő modul maga a QAEGIS Python osztály, melynek váza a QGIS-hez írt plugin builder beépülővel lett generálva. Ez biztosítja, hogy az alap szerkezete megfelelő legyen az alapprogramba való integráláshoz, és minden szükséges metaadattal rendelkezzen. Ebben az osztályban férünk hozzá a QGIS interfészéhez, amin belül az aktuális projekt példánnyal dolgozik a modul. Mivel a QGIS grafikus felülete a Qt szoftverkönyvtáron alapul, ezért az események kezelésére az úgynevezett \emph{szignálokat} használjuk fel. A szignálokat a felhasználó tevékenységei váltják ki, és egy adott információhalmazt adnak, amire ráköthetünk saját implementálású feldolgozófüggvényeket. A szignálok és kezelésük áttekintésével könnyen megérthető a beépülő modul működése.
@@ -205,20 +201,39 @@ A létrehozott programkód szerkezete szétválasztható a C\#-ban valamint a Py
 A C\# nyelven implementált kód az alábbi struktúrát követi:
 \begin{enumerate}
 	\item Az AEGIS egyes funckinalitásai a megfelelő könyvtárakban található állományokban vannak
-	\item A geometriatranszformációk, valamint a transzformációgenerátorok osztályai az AEGIS Processing könyvtárának QgisTransformation alkönyvtárában kerültek mentésre
-	\item A munkapéldány wrapper osztálya az AEGIS Versioning WorkingCopy könyvtárában lett létrehozva, az általa használt eredeti WorkingCopy mellett 
+	\item A geometriatranszformációk, valamint a transzformációgenerátorok osztályai az AEGIS Processing könyvtárának \texttt{QgisTransformation} alkönyvtárában kerültek mentésre
+	\item A munkapéldány wrapper osztálya az AEGIS Versioning \texttt{WorkingCopy} könyvtárában lett létrehozva, az általa használt eredeti \texttt{WorkingCopy} mellett 
 \end{enumerate}
 A Python kód a qaegis mappában található, az alábbi szerkezetel:
 \begin{enumerate}
-	\item A plugin magját adó QAEGIS osztály definícióját, valamint a QgisWorkingCopy osztályt a qaegis.py állomány tartalmazza
+	\item A plugin magját adó \texttt{QAEGIS} osztály definícióját, valamint a \texttt{QgisWorkingCopy} osztályt a qaegis.py állomány tartalmazza
 	\item A szükséges konverziók implementációi a converters.py fájlban találhatóak
-	\item A kezelőfelület leírása a qaegis\_dialog.ui állományba, a működtetéséhez szükséges kód az azonos nevű de Python kiterjesztésű fájlba került
+	\item A kezelőfelület leírása a \texttt{qaegis\_dialog.ui} állományba, a működtetéséhez szükséges kód az azonos nevű de Python kiterjesztésű fájlba került
 \end{enumerate}
 \subsection{A működéshez szükséges binárisok}
 A beépülő modul működéséhez szükséges az AEGIS csomag dllekké fordított verziója a plugin könyvtáron belüli aegis mappában kapott helyet, a lefordított Python.NET CLR modul pedig az azonos szülőmappájú \texttt{pythonnet} könyvtárban található.
 
 \section{A működésben lévő beépülő modul könyvtárszerkezete}
 A használatban lévő plugin a QGIS Python beépülőket tartalmazó mappájában található, ebben a könyvtárban van minden szükséges állomány. A tényleges verziókezelést biztosító tárolók a kezelt projektet tartalmazó mappában kerülnek létrehozásra, egy \texttt{projektnév\_qaegis\_repository} nevű mappában, ezen belül pedig a kezelt projekt nevével megegyező mappákban találhatóak a szükséges fájlok. Ezen belül a changesets mappa verziószámokkal elnevezett forrásaiban találhatóak a revíziókhoz tartozó változáslisták, a snapshots mappa tartalmazza az esetlegesen mentett verzióállapotokat, a revisioncontrol fájl pedig az összes többi használt adatnak ad helyet. A QWCData állomány tartalma az összes AEGIS-en kívüli követendő adat szerializált formája.
+
+\section{A program fordítása}
+A program fordítása három lépésből áll: Az AEGIS fordítása, a Python .NET fordítása, végül pedig a plugin deploy.
+\subsection{Az AEGIS modulok fordítása}
+Az AEGIS-ben található források fordítása értelemszerű C\# fordítás. A fordítás után keletkezett dll állományokat át kell másolni a plugin munkakönyvtárának aegis almappájába
+\subsection{A pythonnet fordítási környezet előkészítése}
+A QGIS architektúrája miatt -ami saját belső verziót használ a python nyelvből- a \emph{Python .Net} clr modul fordításához több előzetes lépést is végre kell hajtani:
+\begin{enumerate}
+	\item A QGIS-t az OSGeo4W telepítőn keresztül kell installálni, a setuptools, pyrcc5 csomagokkal együtt
+	\item Az OSGeo4W shellt megnyitva futtatni kell a bin könyvtárban található \emph{py3\_env.bat} valamint \emph{qt5\_env.bat} fájlokat
+	\item ezután a setuptools által biztosított easy\_install parancs segítségével telepítsük a pip-et
+	\item a pip segítségével telepítsük a wheel modult.
+\end{enumerate}
+Ezek után lépjünk be a pythonnet könyvtárba, és fordítsuk le a következő paranccsal : \texttt{python setup.py build\_ext --inplace} 
+\begin{note}
+A pythonnet fordításához a felsorolt lépéseken kívül szükséges még a .Net keretrendszer 3.5-ös verziója, ami már nem alapértelmezetten része a Windows operációs rendszernek, valamint szükséges a Windows SDK vagy egy Visual Studio jelenléte is a számítógépen. Mindezeken felül a pythonnet fordítása során használt \emph{UnmanagedExports} modul miatt a rendszer nyelve angol kell hogy legyen, ez azt jelentheti, hogy az operációs rendszert újra kell telepíteni angol nyelven.
+\end{note}
+\subsection{A plugin fordítása (\emph{deploy})}
+Ha lefordítottuk az AEGIS és Python .Net modulokat, akkor a \texttt{pb\_tool deploy} paranccsal fordíthatjuk le a python kódból valamint ui fájlokból származó forrásokat. Ez a parancs be is másolja a QGIS plugin könyvtárába a beépülő modult.
 
 \section{Tesztelés}
 A tesztelés hagyományos feketedoboz típusú tesztelésként történt, az alábbi tesztelési terv mentén:
@@ -313,15 +328,6 @@ Az AEGIS szerkezetéből adódóan számos lehetőséget biztosít további funk
 	\item A kezelőfelület bővíthető lenne egy, a verziókezelők exportálására és importálására alkalmas funkcióval, így nem kéne az állományok másolását alkalmazni projekt betöltésére.
 	\item Mivel a QGIS a geometriák megjelenítésének vizuális részleteit, például a színüket, a rétegekhez kötve szabályozza, a rétegek stílusának követésével pontosabb állapotbetöltésre lenne lehetőség
 \end{enumerate}
-
-\section{Megjegyzések a fejlesztés közben felmerült problémákat illetően}
-\subsection{Külső könyvtárak használata}
-Számomra az egyik legnagyobb nehézséget az jelentette, hogy a jellegéből adódóan az általam írt alkalmazásnak idomulnia kellett mind a QGIS, az AEGIS és a Python.NET sajátosságaihoz is. Ez a felhasznált algoritmusok tervezésekor sokszor nehézséget jelentett. Ezen kívül problémás volt a QGIS API dokumentációja is, sok technikai részletről nem tesz említést, így az ezek által okozott problémák csak tesztelés során váltak láthatóvá, valamint sok helyen nem pontosan úgy viselkedtek a QGIS funkciói, ahogyan azok dokumentálva voltak.
-\subsection{A Python.NET fordítási nehézségei}
-\todo[inline]{Teljesen biztos vagy benne, hogy a nyelvi beállítás okozta a hibát? Mert ilyet csak akkor írj le, ha ez 100\%. -- Igen, konkrétan a pythonnet vagy az általa használt modul hivatalos oldalán volt feltüntetve, hogy ismert hiba, és ez okozza}
-A Python.NET CLR moduljának használatához le kellett azt fordítani, ami sokkal nehezebb feladatnak bizonyult mint elsőre számítottam volna.A fordítója számos dependenciával dolgozik, és ezek nem várt hibákkal rendelkeztek. A legmeglepőbb talán az volt, amikor kiderült, hogy a modul nem fordul le olyan operációs rendszeren aminek a rendszernyelve nem angol. Mivel a Windows csak a megjelenítési nyelv változtatását támogatja, a fejlesztés érdekében az egész operációs rendszeremet le kellett cserélni egy angol nyelvű verzióra.
-
-
 
 \section{Fogalomtár}
 \label{sec:definitions}

@@ -3,13 +3,13 @@
 \section{A verziókezelésről röviden}
 Verziókezelés alatt azon tevékenységet értjük, amely során egy változó állapotú folyamat változásait tároljuk és kezeljük. Egy verziókezelt projekt esetén nem csak visszaállíthatóak korábbi állapotok és előállíthatóak újabbak, hanem követhető az állományok alakulása is, valamint leegyszerűsödik a munkamegosztással járó problémák mennyisége is.   
 \section{A téradatok verziókezelésének problémája}
-Téradatokkal -- vagy bármilyen kép alapú adatokkal -- egyre több szakterület dolgozik, és általánosan ezek a folyamatok kifejezetten magas számú felhasználók által végzett módosítással járnak. Az információk tárolása vagy binárisan, vagy valamilyen összetett geodéziai adatbázis állománnyal történik, ezek verziókövetésére pedig nem született még általánosan alkalmazható megoldás. A QGIS egy széles körben elterjedt, főleg térképészeti adatok létrehozását, módosítását és tárolását támogató szoftver, ami még nem rendelkezik verziókezelést megvalósító kiegészítéssel, a Q-Aegis modul ezen hiány betöltésére született.
+Téradatokkal -- vagy bármilyen kép alapú adatokkal -- egyre több szakterület dolgozik, és általánosan ezek a folyamatok kifejezetten magas számú felhasználók által végzett módosítással járnak. Az információk tárolása vagy binárisan, vagy valamilyen összetett geodéziai adatbázis állománnyal történik, ezek verziókövetésére pedig nem született még általánosan alkalmazható megoldás. A QGIS egy széles körben elterjedt, főleg térképészeti adatok létrehozását, módosítását és tárolását támogató szoftver, ami még nem rendelkezik verziókezelést megvalósító kiegészítéssel, a \emph{Q-Aegis} modul ezen hiány betöltésére született.
 \section{A modul működése}
-A Q-Aegis plugin az AEGIS nevű téradatkezelő keretrendszer felhasználásával biztosítja a QGIS-ben létrehozott projektek műveletalapú verziókezelését. A verziókezelő és a szerkesztőprogram közti technikai különbségeket a nyílt forráskódú \emph{Python.Net} \cite{pythonnet} modul használatával hidalja át. A program követi a rétegek és a rajtuk lévő objektumok (\emph{feature}ök) változásait, a geometriák alakulását reverzibilis transzformációkká alakítja és ezeket tárolja. A korábbi vagy újabb verziók betöltésekor így nem szükséges forrásfájlokat cserélni, a rétegek új állapotait beállítani, mindez automatikusan megtörténik. Ezen kívül a megvalósítása miatt a Q-Aegis plugin lehetővé teszi, hogy a QGIS-ben végzett munka során csupán az eredetileg nem menthető memóriában tárolt rétegekkel dolgozzon a felhasználó.
+A \emph{Q-Aegis} plugin az AEGIS nevű téradatkezelő keretrendszer felhasználásával biztosítja a \emph{QGIS}-ben létrehozott projektek műveletalapú verziókezelését. A verziókezelő és a szerkesztőprogram közti technikai különbségeket a nyílt forráskódú \emph{Python.Net} \cite{pythonnet} modul használatával hidalja át. A program követi a rétegek és a rajtuk lévő objektumok (\emph{feature}ök) változásait, a geometriák alakulását reverzibilis transzformációkká alakítja és ezeket tárolja. A korábbi vagy újabb verziók betöltésekor így nem szükséges forrásfájlokat cserélni, a rétegek új állapotait beállítani, mindez automatikusan megtörténik. Ezen kívül a megvalósítása miatt a \emph{Q-Aegis} plugin lehetővé teszi, hogy a \emph{QGIS}-ben végzett munka során csupán az eredetileg nem menthető memóriában tárolt rétegekkel dolgozzon a felhasználó.
 
 \section{A beépülő modul telepítése}
 \subsection{Rendszerkövetelmények}
-Mivel a program egy beépülő modul (\emph{plugin}) a QGIS térinformatikai programhoz, ezért használatához szükséges legalább a szoftver jelenléte. A modul a QGIS 3.x-es verzióit támogatja, a tesztelés 3.6-os verzióval történt. Az AEGIS csomag használata miatt, amennyiben nincs még jelen a rendszerben, telepíteni kell a Microsoft .NET keretrendszer 4.0-s, vagy annál frissebb verzióját. Az előbbi dependencia miatt a program Linux és MacOS operációs rendszerek alatt a Mono platform telepítése is szükséges. 
+Mivel a program egy beépülő modul (\emph{plugin}) a \emph{QGIS} térinformatikai programhoz, ezért használatához szükséges legalább a szoftver jelenléte. A modul a \emph{QGIS} 3.x-es verzióit támogatja, a tesztelés 3.6-os verzióval történt. Az \emph{AEGIS} csomag használata miatt, amennyiben nincs még jelen a rendszerben, telepíteni kell a \emph{Microsoft .NET} keretrendszer 4.0-s, vagy annál frissebb verzióját. Az előbbi dependencia miatt a program Linux és MacOS operációs rendszerek alatt a Mono platform telepítése is szükséges. 
 \subsection{Telepítés}
 A beépülő telepítése kifejezetten egyszerű, csak ki kell csomagolni a mellékelt tömörített állomány tartalmát a helyi QGIS verzió \texttt{python/plugins} könyvtárába, amely telepítési könyvtár a \texttt{apps/qgis/python/plugins} útvonalán érhető el. Ezután a QGIS-t elindítva a \emph{Plugins / Manage and install plugins} menüponton keresztül megnyitott plugin kezelőben be kell kapcsolni a Q-Aegis plugint, hogy az ábrán látható állapotot kapjuk :
 \begin{figure}[H]
@@ -23,7 +23,7 @@ Ezután a verziókezelő modul használatra kész.
 	
 \section{A verziókezelő használata}
 \subsection{A kezelőfelület}
-A beépülő modul a QGIS-en belül létrehozott projektekkel van összekötve, így amíg nem nyitunk meg egy projektet, nem érjük el az új funkciókat. Projekt létrehozása vagy megnyitása után a modul kezelőfelülete a QGIS beépülő modulok eszköztárán található ikonra (\ref{fig:picture-2}.~ábra) kattintva nyitható meg, és a \ref{fig:picture-3}. ábrán látható módon néz ki alapértelmezett állapotban.
+A beépülő modul a \emph{QGIS}-en belül létrehozott projektekkel van összekötve, így amíg nem nyitunk meg egy projektet, nem érjük el az új funkciókat. Projekt létrehozása vagy megnyitása után a modul kezelőfelülete a \emph{QGIS} beépülő modulok eszköztárán található ikonra (\ref{fig:picture-2}.~ábra) kattintva nyitható meg, és a \ref{fig:picture-3}. ábrán látható módon néz ki alapértelmezett állapotban.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.8\textwidth,height=170px]{images/plugin_button_new.png}
@@ -38,11 +38,11 @@ A beépülő modul a QGIS-en belül létrehozott projektekkel van összekötve, 
 \end{figure}
 Az ablak a \emph{Cancel} bezárás gombbal zárható be, a többi gomb funkciójára, valamint a felület esetleges változásaira a használatot magyarázó részekben térünk ki.
 \subsection{Új követett projekt létrehozása}
-Új projekt létrehozása esetén, a -QGIS eredeti működésétől eltérően- a modul felajánlja a projekt mentését. Amennyiben mentésre kerül az új projekt, a verziókezelő funkciók elérhetővé válnak. Mivel a modul megfelelő működéséhez szükséges a projektfájl jelenléte, ezért a mentés hiányában nem jön létre verziózott projekt, amire figyelmeztet is a program.
+Új projekt létrehozása esetén, -a \emph{QGIS} eredeti működésétől eltérően- a modul felajánlja a projekt mentését. Amennyiben mentésre kerül az új projekt, a verziókezelő funkciók elérhetővé válnak. Mivel a modul megfelelő működéséhez szükséges a projektfájl jelenléte, ezért a mentés hiányában nem jön létre verziózott projekt, amire figyelmeztet is a program.
 Ha már meglévő projektet szeretnénk verziókezelés alá vonni, akkor a projektfájl megnyitása után a kezelőfelületen található \emph{Commit} beküldés gombra kattintva a projekt teljes állapota bekerül a rendszerbe és a további módosítások már követhetőek lesznek.
 
 \subsection{Módosítások mentése a verziókezelőbe}
-Miután módosításokat végeztünk a projekten, a \emph{Commit} gomb újbóli megnyomásával az új állapot bekerül a revíziókezelő rendszerbe. A QGIS szerkesztési funkciói azok széles terjedelme miatt (egyelőre) nem teljes körűen támogatottak Q-Aegisben, hanem a következő alapvető módosítások kezeltek:
+Miután módosításokat végeztünk a projekten, a \emph{Commit} gomb újbóli megnyomásával az új állapot bekerül a revíziókezelő rendszerbe. A \emph{QGIS} szerkesztési funkciói azok széles terjedelme miatt (egyelőre) nem teljes körűen támogatottak \emph{Q-Aegis}ben, hanem a következő alapvető módosítások kezeltek:
 \begin{itemize}
 	\item Új réteg hozzáadása
 	\item Létező réteg eltávolítása
@@ -75,11 +75,11 @@ Ha korábbi állapot van betöltve, és módosításokat végzünk rajta, akkor 
 \end{figure}
 
 \begin{note}
-A QGIS több opcióval is rendelkezik arra, hogy milyen módon tároljuk a rétegeinket. A Q-Aegis csak a vektoros rétegtípusokon végzett műveleteket támogatja. Szerkesztés közben nem számít, hogy memóriában tárolt ideiglenes réteggel, vagy \emph{Shapefile}-ban tárolt réteggel dolgozunk \todo{Itt számít, hogy konkrétan Shapefile vagy csak annyi, hogy fájlba mentett? -- Számít, ugyanis shapefile esetén más a feature id-k kezelése}, viszont verzió betöltésekor az összes réteg törlődik, és a betöltendő verziónak megfelelő rétegek jönnek létre, amik mind memóriában tároltak.
+A \emph{QGIS} több opcióval is rendelkezik arra, hogy milyen módon tároljuk a rétegeinket. A \emph{Q-Aegis} csak a vektoros rétegtípusokon végzett műveleteket támogatja. Szerkesztés közben nem számít, hogy memóriában tárolt ideiglenes réteggel, vagy \emph{Shapefile}-ban tárolt réteggel dolgozunk \todo{Itt számít, hogy konkrétan Shapefile vagy csak annyi, hogy fájlba mentett? -- Számít, ugyanis shapefile esetén más a feature id-k kezelése}, viszont verzió betöltésekor az összes réteg törlődik, és a betöltendő verziónak megfelelő rétegek jönnek létre, amik mind memóriában tároltak.
 \end{note}
 
 \subsection{Aktuális verzió száma}
-Mivel ha nem a legutóbbi verzión állunk, nem engedélyezett a módosítások mentése, ezért szükséges, hogy tudjuk követni épp melyik verzión állunk. Ezt teszi lehetővé a QGIS ablak bal alsó sarkában található verziószám címke, ami az alábbi módon néz ki.
+Mivel ha nem a legutóbbi verzión állunk, nem engedélyezett a módosítások mentése, ezért szükséges, hogy tudjuk követni épp melyik verzión állunk. Ezt teszi lehetővé a \emph{QGIS} ablak bal alsó sarkában található verziószám címke, ami az alábbi módon néz ki.
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.7\textwidth,height=150px]{images/version_display.png}
@@ -89,7 +89,7 @@ Mivel ha nem a legutóbbi verzión állunk, nem engedélyezett a módosítások 
 
 
 \subsection{Verziókezelt projekt betöltése}
-A Q-Aegis jelenleg még nem ad lehetőséget arra, hogy létező tárolóból hozzunk létre egy új QGIS projektet, de az alábbi lépésekkel ez megvalósítható:
+A \emph{Q-Aegis} jelenleg még nem ad lehetőséget arra, hogy létező tárolóból hozzunk létre egy új QGIS projektet, de az alábbi lépésekkel ez megvalósítható:
 \begin{enumerate}
 	\item Hozzunk létre egy új projektet, mentsük el, így létrehozva egy új, üres tárolót
 	\item Másoljuk le a projekt fájlt tartalmazó könyvtárban található, \texttt{projektnév\_qaegis\_repository} mappát
@@ -98,5 +98,5 @@ A Q-Aegis jelenleg még nem ad lehetőséget arra, hogy létező tárolóból ho
 \end{enumerate}
 	
 \section{A modul eltávolítása}
-A Q-Aegis modul kikapcsolható a QGIS beépülő modulokat kezelő felületén, ugyanúgy ahogy hozzáadásra került. A teljes eltávolításhoz töröljük ki a \texttt{qaegis} mappát a \texttt{plugins} könyvtárból.
+A \emph{Q-Aegis} modul kikapcsolható a \emph{QGIS} beépülő modulokat kezelő felületén, ugyanúgy ahogy hozzáadásra került. A teljes eltávolításhoz töröljük ki a \texttt{qaegis} mappát a \texttt{plugins} könyvtárból.
 	
