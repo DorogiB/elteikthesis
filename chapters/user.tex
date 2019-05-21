@@ -64,22 +64,20 @@ Amennyiben már van a projekthez mentett verzió, a kezelőfelület némileg meg
 Ha korábbi állapot van betöltve, és módosításokat végzünk rajta, akkor ha menteni próbálunk, a rendszer hibaüzenettel jelzi, hogy előbb a legfrissebb verzióra kell állni és utána lehet módosítani.
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.8\textwidth,height=190px]{images/version_combobox.png}
+	\includegraphics[width=0.8\textwidth,height=180px]{images/version_combobox.png}
 	\caption{A verzióválasztó lista}
 	\label{fig:picture-4}
 \end{figure}
 \begin{figure}[H]
 	\centering
-	\includegraphics[width=0.7\textwidth,height=150px]{images/version_spinner.png}
+	\includegraphics[width=0.7\textwidth,height=110px]{images/version_spinner.png}
 	\caption{A verzióválasztó beviteli mező}
 	\label{fig:picture-5}
-\end{figure}\todo{Ez a 2. ábra kicsit torzítottnak tűnik?}
+\end{figure}
 
 \begin{note}
-A \emph{QGIS} több opcióval is rendelkezik arra, hogy milyen módon tároljuk a rétegeinket. A \emph{Q-Aegis} csak a vektoros rétegtípusokon végzett műveleteket támogatja. Szerkesztés közben nem számít, hogy memóriában tárolt ideiglenes réteggel, vagy \emph{Shapefile}-ban tárolt réteggel dolgozunk, viszont verzió betöltésekor az összes réteg törlődik, és a betöltendő verziónak megfelelő rétegek jönnek létre, amik mind memóriában tároltak.
-\todo[inline]{Itt számít, hogy konkrétan Shapefile vagy csak annyi, hogy fájlba mentett?\\
-Számít, ugyanis shapefile esetén más a feature id-k kezelése\\
-Mi történik ha pl. GML formátumban mentjük az adatokat?}
+A \emph{QGIS} több opcióval is rendelkezik arra, hogy milyen módon tároljuk a rétegeinket. A \emph{Q-Aegis} csak a vektoros rétegtípusokon végzett műveleteket támogatja. Szerkesztés közben nem számít, hogy memóriában tárolt ideiglenes réteggel, vagy adatbázis fájlban tárolt réteggel dolgozunk, viszont verzió betöltésekor az összes réteg törlődik, és a betöltendő verziónak megfelelő rétegek jönnek létre, amik mind memóriában tároltak.
+
 \end{note}
 
 \subsection{Aktuális verzió száma}
